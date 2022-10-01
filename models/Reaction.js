@@ -1,19 +1,28 @@
-const { Schema, model } = require("mongoose")
+const { Schema } = require("mongoose");
+const dateFormat = require("../utils/dateFormat");
 
-const UserSchema = new Schema({
-  username: {
-    type: String,
-    unique: true,
-    required: true,
-    trim: true,
+const reactionSchema = new Schema(
+  {
+    reactionBody: {
+      type: String,
+      required: true,
+      maxlength: 280,
+    },
+    username: {
+      type: String,
+      required: true,
+    },
+    createdAt: {
+      type: Date,
+      default: Date.now,
+      get: (timestamp) => dateFormat(timestamp),
+    },
   },
-  email: {
-    type: String,
-    unique: true,
-    required: true,
-    match: [
-      /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
-      "Must match an email address",
-    ],
-  },
-});
+  {
+    toJSON: {
+      getters: true,
+    },
+  }
+);
+
+module.exports = reactionSchema;
