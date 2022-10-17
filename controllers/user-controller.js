@@ -60,24 +60,42 @@ const userController = {
         res.status(500).json(err);
       });
   },
-  // add friend
-  addFriend(req, res) {
-    User.findOneAndUpdate(
-      { _id: req.params.userId },
-      { $addToSet: { friends: req.params.friendId } },
-      { new: true }
-    )
+  // delete user
+  deleteUser(req, res) {
+    User.findByIdAndDelete({ _id: req.params.userId })
       .then((userData) => {
         if (!userData) {
           return res
             .status(404)
             .json({ message: "This user id does not exist." });
         }
-        res.json(userData);
+        return Thought.deleteMany({ _id: { $in: dbUserData.thoughts } });
+      })
+      .then(() => {
+        res.json({ message: "User deleted" });
       })
       .catch((err) => {
         res.status(500).json(err);
       });
+  },
+  // add friend
+  addFriend({ params }, res) {
+    User.findOne({ _id: params.friendId })
+      .then(({ _id }) => {
+        return User.findOneAndUpdate(
+          { _id: params.userId },
+          { $addToSet: { friends: _id } },
+          { new: true }
+        );
+      })
+      .then((dbUserData) => {
+        if (!dbUserData) {
+          res.status(404).json({ message: "This user id does not exist." });
+          return;
+        }
+        res.json(dbUserData);
+      })
+      .catch((err) => res.json(err));
   },
   // remove friend
   removeFriend(req, res) {
